@@ -1,0 +1,14 @@
+name: aviation-delay-ml
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - joblib
+  - jupyter
+  - nbformat
+  - reportlab
+  - python-pptx
