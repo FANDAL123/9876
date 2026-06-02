@@ -689,6 +689,19 @@ import shap
 Xt_train = best_model.named_steps["preprocess"].transform(X_train)
 Xt_test = best_model.named_steps["preprocess"].transform(X_test)
 clf = best_model.named_steps["model"]
+from catboost import CatBoostClassifier
+
+# Добавьте модель в словарь или список моделей для обучения
+models = {
+    # ... другие модели
+    "CatBoost": CatBoostClassifier(
+        iterations=500,        # Количество деревьев
+        learning_rate=0.03,    # Скорость обучения
+        depth=6,               # Глубина дерева
+        verbose=False,         # Отключаем лишний вывод
+        random_seed=42
+    )
+}
 
 explainer = shap.LinearExplainer(clf, Xt_train)
 shap_values = explainer.shap_values(Xt_test)
