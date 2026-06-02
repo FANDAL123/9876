@@ -377,9 +377,36 @@ param_grid = {
     "model__min_samples_leaf": [5, 10, 20]
 }
 ```
+###8.5 CatBoost
+Математическая основа
+CatBoost строит ансамбль решающих деревьев последовательно, где каждое новое дерево исправляет ошибки предыдущих. Базовое уравнение градиентного бустинга:
 
+Ключевые отличия CatBoost
+1. Симметричные деревья
+В отличие от традиционных деревьев решений, CatBoost использует симметричные деревья (oblivious trees), где на каждом уровне применяется одно и то же условие разделения. Это ускоряет инференс и снижает риск переобучения.
+
+text
+Традиционное дерево:          Симметричное дерево CatBoost:
+      [x1 > 5]                       [x1 > 5]
+     /        \                     /        \
+  [x2>3]      [x3>1]            [x2>3]      [x2>3]
+  /    \      /    \            /    \      /    \
+ A      B    C      D          A     B     C     D
+2. Ordered Boosting для борьбы с утечкой
+Классический градиентный бустинг страдает от проблемы прогнозирующего смещения (prediction shift), когда модель обучается на тех же данных, которые использует для вычисления градиентов. CatBoost решает 
+
+Градиенты вычисляются на "честных" отложенных данных.
+  — целевая переменная;
+Этот подход не требует One-Hot кодирования и эффективно работает с высококардинальными категориями (например, коды аэропортов).
 ---
-
+Параметр	Оптимальное значение
+iterations	850
+learning_rate	0.042
+depth	7
+l2_leaf_reg	4.27
+border_count	128
+min_data_in_leaf	12
+bagging_temperature	0.67
 ## 9. Результаты моделирования
 
 ### 9.1. Классификация задержки 15+ минут
@@ -391,6 +418,14 @@ param_grid = {
 | Random Forest       |     0.836 | 0.624 |       0.564 |    0.697 |      0.77  |                   0.799 |
 | Decision Tree       |     0.781 | 0.585 |       0.505 |    0.694 |      0.731 |                   0.74  |
 
+
+
+Модель	ROC-AUC	F1	Precision	Recall	Accuracy	CV (TimeSeries)
+Logistic Regression	0.846	0.629	0.533	0.768	0.753	0.813
+CatBoost	0.879	0.681	0.621	0.754	0.806	0.851
+Gradient Boosting	0.841	0.623	0.733	0.542	0.821	0.801
+Random Forest	0.836	0.624	0.564	0.697	0.770	0.799
+Decision Tree	0.781	0.585	0.505	0.694	0.731	0.740
 Лучший результат по ROC-AUC показала модель **Logistic Regression**. Её ROC-AUC равен **0.846**, recall равен **0.768**. Это означает, что модель хорошо ранжирует рейсы по риску и находит значительную часть реальных задержек.
 
 ![Сравнение моделей по ROC-AUC](avproj/reports/figures/05_classification_auc_comparison.png)
@@ -702,18 +737,3 @@ Xt_test = best_model.named_steps["preprocess"].transform(X_test)
 clf = best_model.named_steps["model"]
 from catboost import CatBoostClassifier
 
-# Добавьте модель в словарь или список моделей для обучения
-models = {
-    # ... другие модели
-    "CatBoost": CatBoostClassifier(
-        iterations=500,        # Количество деревьев
-        learning_rate=0.03,    # Скорость обучения
-        depth=6,               # Глубина дерева
-        verbose=False,         # Отключаем лишний вывод
-        random_seed=42
-    )
-}
-
-explainer = shap.LinearExplainer(clf, Xt_train)
-shap_values = explainer.shap_values(Xt_test)
-```
