@@ -658,7 +658,8 @@ run_all.bat
 6. Federal Aviation Administration. Aviation System Performance Metrics: delay and operational performance documentation.
 7. Bureau of Transportation Statistics. Airline On-Time Performance Data.
 8. IATA. Guidance materials and industry reports on airline delay costs and operational performance.
-
+9. https://catboost.ai/
+10. https://github.com/catboost/catboost
 ---
 
 ## 17. Приложение: фрагменты кода
